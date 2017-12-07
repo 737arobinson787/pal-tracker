@@ -17,6 +17,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import org.springframework.boot.context.embedded.LocalServerPort;
+import org.springframework.boot.web.client.RestTemplateBuilder;
+
 import java.time.LocalDate;
 import java.util.Collection;
 
@@ -33,6 +36,9 @@ public class TimeEntryApiTest {
 
     private TimeEntry timeEntry = new TimeEntry(123, 456, LocalDate.parse("2017-01-08"), 8);
 
+    @LocalServerPort
+    private String port;
+
     @Before
     public void setUp() throws Exception {
         MysqlDataSource dataSource = new MysqlDataSource();
@@ -44,6 +50,13 @@ public class TimeEntryApiTest {
 
     @Test
     public void testCreate() throws Exception {
+
+        RestTemplateBuilder builder = new RestTemplateBuilder()
+                .rootUri("http://localhost:" + port)
+                .basicAuthorization("user", "password");
+
+        restTemplate = new TestRestTemplate(builder);
+
         ResponseEntity<String> createResponse = restTemplate.postForEntity("/time-entries", timeEntry, String.class);
 
 
@@ -59,6 +72,13 @@ public class TimeEntryApiTest {
 
     @Test
     public void testList() throws Exception {
+
+        RestTemplateBuilder builder = new RestTemplateBuilder()
+                .rootUri("http://localhost:" + port)
+                .basicAuthorization("user", "password");
+
+        restTemplate = new TestRestTemplate(builder);
+
         Long id = createTimeEntry();
 
 
@@ -78,6 +98,12 @@ public class TimeEntryApiTest {
 
     @Test
     public void testRead() throws Exception {
+        RestTemplateBuilder builder = new RestTemplateBuilder()
+                .rootUri("http://localhost:" + port)
+                .basicAuthorization("user", "password");
+
+        restTemplate = new TestRestTemplate(builder);
+
         Long id = createTimeEntry();
 
 
@@ -98,6 +124,12 @@ public class TimeEntryApiTest {
         Long id = createTimeEntry();
         TimeEntry updatedTimeEntry = new TimeEntry(2, 3, LocalDate.parse("2017-01-09"), 9);
 
+        RestTemplateBuilder builder = new RestTemplateBuilder()
+                .rootUri("http://localhost:" + port)
+                .basicAuthorization("user", "password");
+
+        restTemplate = new TestRestTemplate(builder);
+
 
         ResponseEntity<String> updateResponse = restTemplate.exchange("/time-entries/" + id, HttpMethod.PUT, new HttpEntity<>(updatedTimeEntry, null), String.class);
 
@@ -116,6 +148,12 @@ public class TimeEntryApiTest {
     public void testDelete() throws Exception {
         Long id = createTimeEntry();
 
+        RestTemplateBuilder builder = new RestTemplateBuilder()
+                .rootUri("http://localhost:" + port)
+                .basicAuthorization("user", "password");
+
+        restTemplate = new TestRestTemplate(builder);
+
 
         ResponseEntity<String> deleteResponse = restTemplate.exchange("/time-entries/" + id, HttpMethod.DELETE, null, String.class);
 
@@ -127,6 +165,13 @@ public class TimeEntryApiTest {
     }
 
     private Long createTimeEntry() {
+
+        RestTemplateBuilder builder = new RestTemplateBuilder()
+                .rootUri("http://localhost:" + port)
+                .basicAuthorization("user", "password");
+
+        restTemplate = new TestRestTemplate(builder);
+
         HttpEntity<TimeEntry> entity = new HttpEntity<>(timeEntry);
 
         ResponseEntity<TimeEntry> response = restTemplate.exchange("/time-entries", HttpMethod.POST, entity, TimeEntry.class);

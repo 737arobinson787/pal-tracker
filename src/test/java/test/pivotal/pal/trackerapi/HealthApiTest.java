@@ -11,6 +11,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import org.springframework.boot.context.embedded.LocalServerPort;
+import org.springframework.boot.web.client.RestTemplateBuilder;
+
 import static com.jayway.jsonpath.JsonPath.parse;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
@@ -19,11 +22,21 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @SpringBootTest(classes = PalTrackerApplication.class, webEnvironment = RANDOM_PORT)
 public class HealthApiTest {
 
-    @Autowired
+    @LocalServerPort
+    private String port;
+
+
     private TestRestTemplate restTemplate;
 
     @Test
     public void healthTest() {
+
+        RestTemplateBuilder builder = new RestTemplateBuilder()
+                .rootUri("http://localhost:" + port)
+                .basicAuthorization("user", "password");
+
+        restTemplate = new TestRestTemplate(builder);
+
         ResponseEntity<String> response = this.restTemplate.getForEntity("/health", String.class);
 
 
